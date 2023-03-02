@@ -1,3 +1,6 @@
+# Suppress warning messages
+options(warn = -1)
+
 if (!require(tm)) install.packages("tm")
 if (!require(slam)) install.packages("slam")
 if (!require(e1071)) install.packages("e1071")
