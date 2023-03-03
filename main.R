@@ -71,18 +71,5 @@ ggplot(df_bar, aes(x = Sentiment, y = Count, fill = Sentiment)) +
   xlab("Sentiment") +
   ylab("Count")
 
-# (b) plot word cloud of most frequent words
-install.packages("wordcloud2")
-library(wordcloud2)
-library(tm)
-
-corpus <- Corpus(VectorSource(df$Summary))
-corpus <- tm_map(corpus, removeWords, stopwords("english")) # remove stop words
-corpus <- tm_map(corpus, stemDocument) # stem words
-dtm <- DocumentTermMatrix(corpus) # create document-term matrix
-freq <- colSums(as.matrix(dtm)) # compute frequency of each word
-top <- sort(freq, decreasing = TRUE)[1:100] # get top 100 most frequent words
-
-wordcloud2(data = top, size = 1, color = "random-dark", backgroundColor = "white")
 
 # ****************** Data Pre-Process ***************** #
