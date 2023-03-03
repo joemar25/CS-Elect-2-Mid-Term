@@ -43,7 +43,7 @@ str(df)
 # (a) View the rows of the data-set
 head(df, 5)
 
-# (b) how many rows
+# (b) how many rows and cols
 nrow(df)
 ncol(df)
 colnames(df)
@@ -72,12 +72,17 @@ ggplot(df_bar, aes(x = Sentiment, y = Count, fill = Sentiment)) +
   ylab("Count")
 
 # (b) plot word cloud of most frequent words
+install.packages("wordcloud2")
+library(wordcloud2)
+library(tm)
+
 corpus <- Corpus(VectorSource(df$Summary))
 corpus <- tm_map(corpus, removeWords, stopwords("english")) # remove stop words
 corpus <- tm_map(corpus, stemDocument) # stem words
 dtm <- DocumentTermMatrix(corpus) # create document-term matrix
 freq <- colSums(as.matrix(dtm)) # compute frequency of each word
-top <- sort(freq, decreasing = TRUE)[1:10] # get top 10 most frequent words
-top
+top <- sort(freq, decreasing = TRUE)[1:100] # get top 100 most frequent words
+
+wordcloud2(data = top, size = 1, color = "random-dark", backgroundColor = "white")
 
 # ****************** Data Pre-Process ***************** #
