@@ -1,46 +1,34 @@
-# ******************* PRE-PROCESSING ********************
+# *************** Data Mining Mid Term **************** #
+#                                                       #
+#                       Title                           #
+#                                                       #
+#                   Group Members                       #
+#             Altamera, Kristel Suzeth                  #
+#                   Cardiño, Joemar                     #
+#                Enorme, Karl Cedric                    #
+#                   Saba, Ainah                         #
+#             San Joaquin, Gabriel Jean                 #
+#                                                       #
+# ***************************************************** #
 
 
-
-
-
+# ****************** Data Exploration ***************** #
 
 # (1) Install required packages if not already installed
 
-if(!require(ISLR)) 
-  install.packages("ISLR")
-
-if(!require(ggplot2))
-  install.packages("ggplot2")
-
-if(!require(wordcloud))
-  install.packages("wordcloud")
-
-if(!require(tm))
-  install.packages("tm")
-
-if(!require(quanteda))
-  install.packages("quanteda")
-
-
-
-
+if (!require(ISLR)) install.packages("ISLR")
+if (!require(ggplot2)) install.packages("ggplot2")
+if (!require(wordcloud)) install.packages("wordcloud")
+if (!require(tm)) install.packages("tm")
+if (!require(quanteda)) install.packages("quanteda")
 
 # (2) Import the libraries to be used
 
 library(ISLR)
-
 library(ggplot2)
-
 library(wordcloud)
-
 library(tm)
-
 library(quanteda)
-
-
-
-
 
 # (3) get file from the correct directory
 
@@ -50,20 +38,17 @@ df <- read.csv("dataset.csv")
 # check the structure of the data frame
 str(df)
 
-
-
-
 # (4) Explore Data
 
-# (a) View the rows of the data-set & see the rows to be viewed
-head(df)
-head(df, 3)
+# (a) View the rows of the data-set
+head(df, 5)
 
 # (b) how many rows
 nrow(df)
 ncol(df)
 colnames(df)
-df$Summary
+
+head(df$Summary, 10)
 
 num_pos <- sum(df$Sentiment == "positive")
 num_neg <- sum(df$Sentiment == "negative")
@@ -73,7 +58,7 @@ cat("number of sentiment positive: ", num_pos, "\n")
 cat("number of sentiment negative: ", num_neg, "\n")
 cat("number of sentiment neutral : ", num_neu, "\n")
 
-options("scipen"=100, "digits"=4)
+options("scipen" = 100, "digits" = 4)
 
 df_bar <- data.frame(
   Sentiment = c("Positive", "Negative", "Neutral"),
@@ -95,3 +80,4 @@ freq <- colSums(as.matrix(dtm)) # compute frequency of each word
 top <- sort(freq, decreasing = TRUE)[1:10] # get top 10 most frequent words
 top
 
+# ****************** Data Pre-Process ***************** #
