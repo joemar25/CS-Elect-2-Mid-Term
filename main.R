@@ -73,3 +73,39 @@ ggplot(df_bar, aes(x = Sentiment, y = Count, fill = Sentiment)) +
 
 
 # ****************** Data Pre-Process ***************** #
+
+#testing for data pre-processing TESTING LNG POOOO************************
+library(caret)
+
+
+#DATA SPLITTING
+# Split data into training and testing subsets
+set.seed(123) # set a seed for reproducibility
+trainIndexdf <- createDataPartition(df$Sentiment, p = 0.8, list = FALSE)
+traindf <- df[trainIndex, ]
+testdf <- df[-trainIndex, ]
+
+
+#PRE-PROCESSING:
+# Pre-process data
+preProcdf <- preProcess(traindf[, -5], method = c("center", "scale", "pca"))
+
+# Apply pre-processing to training and testing data
+trainTransformeddf <- predict(preProcdf, traindf[, -5])
+testTransformeddf <- predict(preProcdf, testdf[, -5])
+
+
+# Train a predictive model
+modeldf <- train(Sentiment ~ ., data = trainTransformeddf, method = "rf", trControl = trainControl(method = "cv"))
+
+
+# Set up cross-validation
+ctrldf <- trainControl(method = "cv", number = 5)
+
+
+# Make predictions on test data
+predictionsdf <- predict(modeldf, testdf)
+
+
+# Compute confusion matrix and other performance measures
+cmdf <- confusionMatrix(predictionsdf, testdf$Sentiment)
