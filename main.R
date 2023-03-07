@@ -72,7 +72,6 @@ ggplot(df_bar, aes(x = Sentiment, y = Count, fill = Sentiment)) +
   ylab("Count")
 
 
-# ****************** Data Pre-Process ***************** #
 
 #testing for data pre-processing TESTING LNG POOOO************************
 library(caret)
@@ -82,8 +81,8 @@ library(caret)
 # Split data into training and testing subsets
 set.seed(123) # set a seed for reproducibility
 trainIndexdf <- createDataPartition(df$Sentiment, p = 0.8, list = FALSE)
-traindf <- df[trainIndex, ]
-testdf <- df[-trainIndex, ]
+traindf <- df[trainIndexdf, ]
+testdf <- df[-trainIndexdf, ]
 
 
 #PRE-PROCESSING:
@@ -109,3 +108,6 @@ predictionsdf <- predict(modeldf, testdf)
 
 # Compute confusion matrix and other performance measures
 cmdf <- confusionMatrix(predictionsdf, testdf$Sentiment)
+print(cmdf)
+
+
