@@ -11,16 +11,27 @@
   
   correct the values for Sentiment
 
+
+in top 3 kzProductName
 to sort data in showing most frequent value
 The table() function in R is used to create a table that shows the frequency of occurrence of different values in a variable or a set of variables. For example, if you have a column in a dataset that contains the names of different types of fruits, you can use the table() function to count how many times each type of fruit appears in the column.
 The output of the table() function is a table that shows the counts of each unique value in the variable. Each row of the table represents a unique value, and the columns show the counts of that value in each category or group.
 Using the table() function can be helpful when you want to get a quick overview of the distribution of values in a variable or when you want to compare the frequency of different values across categories or groups. It is often used as a first step in exploratory data analysis to get a sense of the data before diving into more complex analyses.
 
 
+in ProductPrice (surpassing error)
+The warning message "NAs introduced by coercion" typically means that R is encountering a value that cannot be converted to the target data type, and is therefore replacing it with a special value called NA to indicate that the value is missing.
+In the case of the as.double() function, this warning can occur if the ProductPrice column contains non-numeric values, such as text or other non-numeric characters. When R encounters these values, it cannot convert them to floating-point values and therefore replaces them with NA.
+To address this warning, you can either remove the non-numeric values from the ProductPrice column or replace them with a default value (such as zero or NA) that can be converted to a floating-point data type.
+The thing that I have done is that I removed all uncessesary characters in the column then convert it to float.
 
+in ProductPrice (cleaning by determining regular expression of numbers)
+The string "\\d+(\\.\\d+)?" is a regular expression pattern in R. Here is an explanation of what the different components of the pattern mean:
 
-
-
+\\d+: Matches one or more digits. The \\d is a special character that matches any digit from 0 to 9, and the + means to match one or more of the preceding pattern.
+\\.\\d+: Matches a decimal point followed by one or more digits. The \\. matches a literal period (.), and the \\d+ matches one or more digits following the decimal point.
+()?: Makes the decimal point and digits optional. The () creates a capturing group, which allows the pattern inside the parentheses to be treated as a single unit. The ? after the group makes the entire group optional, meaning it will match zero or one occurrence of the group.
+So the entire pattern "\\d+(\\.\\d+)?" matches any number with or without a decimal point. For example, it would match "42", "3.14", or "0.123". The pattern would not match "." (a lone decimal point with no digits) or "1." (a number with a trailing decimal point but no digits after it).
 
 
 

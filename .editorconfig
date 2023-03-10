@@ -1,2 +1,2 @@
-[*.js]
-max-line-length = off
+[*.{js,jsx,ts,tsx,css,scss,less,html,json,yml,yaml,md,R,r}]
+max_line_length = off
