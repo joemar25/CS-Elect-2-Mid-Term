@@ -124,8 +124,8 @@ sum(is.na(df$Sentiment))
 # - (2) why is that the total and obs don't match? - maybe there are not equal to positive/negative/neutral
 other_sentiments <- df$Sentiment[!(df$Sentiment %in% c("positive", "negative", "neutral"))]
 
-# truth
-print(other_sentiments)
+# truth -> we only check for the number of values of the lowercase(positive, negativem neutral)
+unique(df$Sentiment)
 
 # get the other sentiments count
 num_other_sentiments <- sum(!(df$Sentiment %in% c("positive", "negative", "neutral")))
@@ -169,9 +169,10 @@ print(top_3_values)
 
 # if the ProductPrice is in character then normal_price would be 0
 normal_price <- sum(is.na(df$ProductPrice))
+# you cannot sum a number that is not numeric...
 normal_price
 
-# converting to double
+# converting to double - warning ahead
 df$ProductPrice <- as.double(df$ProductPrice)
 
 # count the number of non-missing values in ProductPrice
@@ -207,7 +208,8 @@ cat("obs. =", obs_count, "\n")
 
 # Present the missing values in ProductPrice
 missing_values <- df$ProductPrice[which(is.na(df$ProductPrice))]
-missing_values
+# what are the values that are not numeric
+unique(missing_values)
 
 # calculate the total price
 total_price <- sum(df$ProductPrice, na.rm = TRUE)
@@ -273,6 +275,9 @@ hist(df$ProductPrice,
 
 
 # ****************** Data Pre-Process ***************** #
+
+# fresh start
+df <- read.csv("dataset.csv")
 
 # ********************* The Price ********************* #
 
