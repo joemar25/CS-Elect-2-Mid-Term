@@ -1,0 +1,29 @@
+- on the first str(df)
+  we can see the variables data type and some are incorrect (rate, price) as chr
+  we can also observe kzProductName instead of ProductName
+  we can also observe the kzProductNames row values (not clean), same with Review and Summary
+  
+  [change kzProductNames to ProductNames, clean the Summary and Summary
+  correct the data types of variables
+
+- on the first total
+  we can see that obs and the (num_pos + num_neg + num_neu) are not equal, so we investigate
+  
+  correct the values for Sentiment
+
+to sort data in showing most frequent value
+The table() function in R is used to create a table that shows the frequency of occurrence of different values in a variable or a set of variables. For example, if you have a column in a dataset that contains the names of different types of fruits, you can use the table() function to count how many times each type of fruit appears in the column.
+The output of the table() function is a table that shows the counts of each unique value in the variable. Each row of the table represents a unique value, and the columns show the counts of that value in each category or group.
+Using the table() function can be helpful when you want to get a quick overview of the distribution of values in a variable or when you want to compare the frequency of different values across categories or groups. It is often used as a first step in exploratory data analysis to get a sense of the data before diving into more complex analyses.
+
+
+
+
+
+
+
+
+
+
+
+

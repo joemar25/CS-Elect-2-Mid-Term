@@ -1,22 +1,8 @@
-if (!require(ISLR)) {
-  install.packages("ISLR")
-}
-
-if (!require(ggplot2)) {
-  install.packages("ggplot2")
-}
-
-if (!require(wordcloud)) {
-  install.packages("wordcloud")
-}
-
-if (!require(tm)) {
-  install.packages("tm")
-}
-
-if (!require(quanteda)) {
-  install.packages("quanteda")
-}
+if (!require(ISLR)) install.packages("ISLR")
+if (!require(ggplot2)) install.packages("ggplot2")
+if (!require(wordcloud)) install.packages("wordcloud")
+if (!require(tm)) install.packages("tm")
+if (!require(quanteda)) install.packages("quanteda")
 
 
 library(ISLR)
