@@ -350,7 +350,7 @@ sum(is.na(df))
 # *********************** General ********************* #
 
 # remove unnecessary columns
-df <- subset(df, select = c("ProductName", "ProductPrice", "Summary", "Sentiment"))
+df <- subset(df, select = c("ProductName", "ProductPrice", "Rate", "Summary", "Sentiment"))
 
 # ***************** The ProductName ******************* #
 
@@ -437,10 +437,6 @@ hist(df$ProductPrice,
 )
 
 # ********************* The Rate ********************** #
-# itama ang mga data types ng columns
-# linisin ang mga columns data
-
-# ******************** The Review ********************* #
 # itama ang mga data types ng columns
 # linisin ang mga columns data
 
