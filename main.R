@@ -82,7 +82,8 @@ options(width = 120)
 # check the structure of the data frame
 str(df)
 
-# checking dataset of each columns, and we can see the columns if has missing values
+# checking dataset of each columns
+# we can see the columns if has missing values
 summary(df)
 
 # obs and var
@@ -110,7 +111,10 @@ unique(df$Sentiment)
 
 sentiment_counts <- df %>% count(Sentiment)
 sentiment_counts$total <- obs_count
-sentiment_counts$Percentage <- paste0(round((sentiment_counts$n / sentiment_counts$total) * 100, 2), "%")
+sentiment_counts$Percentage <- paste0(
+  round((sentiment_counts$n / sentiment_counts$total) * 100, 2),
+  "%"
+)
 sentiment_counts
 
 # plot start
@@ -119,7 +123,11 @@ options("scipen" = 100, "digits" = 4)
 # this is not case sensitive (positive can also be Positive)
 df_bar <- data.frame(
   Sentiment = c("Positive", "Negative", "Neutral"),
-  Count = c(sentiment_counts$n[sentiment_counts$Sentiment == "positive"], sentiment_counts$n[sentiment_counts$Sentiment == "negative"], sentiment_counts$n[sentiment_counts$Sentiment == "neutral"])
+  Count = c(
+    sentiment_counts$n[sentiment_counts$Sentiment == "positive"],
+    sentiment_counts$n[sentiment_counts$Sentiment == "negative"],
+    sentiment_counts$n[sentiment_counts$Sentiment == "neutral"]
+  )
 )
 
 ggplot(df_bar, aes(x = Sentiment, y = Count, fill = Sentiment)) +
@@ -127,8 +135,6 @@ ggplot(df_bar, aes(x = Sentiment, y = Count, fill = Sentiment)) +
   ggtitle("Sentiment Analysis") +
   xlab("Sentiment") +
   ylab("Count")
-
-
 
 # ****************** The kzProductName **************** #
 
@@ -158,13 +164,14 @@ top_3_df <- data.frame(
 )
 
 # Format the output to use fewer decimal places
-top_3_df$Percentage <- format(round(as.numeric(sub("%", "", top_3_df$Percentage)) / 100, 2), nsmall = 2, digits = 2)
+top_3_df$Percentage <- format(
+  round(as.numeric(sub("%", "", top_3_df$Percentage)) / 100, 2),
+  nsmall = 2,
+  digits = 2
+)
 
 # Print the resulting data frame
 print(top_3_df, row.names = FALSE)
-
-
-
 
 # ********************* The Price ********************* #
 
@@ -187,7 +194,10 @@ df$ProductPrice <- as.double(df$ProductPrice)
 total_price <- sum(df$ProductPrice, na.rm = TRUE)
 
 # format the total price with commas and a dollar sign
-formatted_price <- paste0("$", format(total_price, big.mark = ",", scientific = FALSE))
+formatted_price <- paste0(
+  "$",
+  format(total_price, big.mark = ",", scientific = FALSE)
+)
 
 # print the formatted total price
 formatted_price # this is suppoed to be $895,321,820 when data is cleaned for ProductPrice
@@ -224,9 +234,6 @@ hist(df$ProductPrice,
 )
 
 # price representation - will be represented again when it is cleaned to see differences
-
-
-
 
 # ********************** The Rate ********************* #
 
@@ -267,11 +274,9 @@ ggplot(df, aes(y = Rate)) +
   labs(y = "Rating") +
   ggtitle("Distribution of Ratings")
 
+# ********************** The Review ******************* #
 
-
-
-
-# Summary statistics for Review length
+# Summary statistics for Review
 summary(df$Review)
 
 # Top 10 most frequent Review
@@ -287,11 +292,7 @@ ggplot(top_review, aes(x = Review, y = n)) +
   ylab("Count") +
   ggtitle("Top 10 most frequent Review")
 
-
-
-
-
-
+# ********************* The Summary ******************* #
 
 # Summary statistics for Summary
 summary(df$Summary)
@@ -309,7 +310,7 @@ ggplot(top_summary, aes(x = Summary, y = n)) +
   ylab("Count") +
   ggtitle("Top 10 most frequent Summary")
 
-
+# ***************************************************** #
 
 
 
@@ -348,24 +349,20 @@ sum(is.na(df))
 
 # *********************** General ********************* #
 
+# remove unnecessary columns
+df <- subset(df, select = c("ProductName", "ProductPrice", "Summary", "Sentiment"))
+
+# ***************** The ProductName ******************* #
+
 # rename the kzProductName column to ProductName
 colnames(df)[colnames(df) == "kzProductName"] <- "ProductName"
 
 # verify that the column has been renamed
 colnames(df)
 
-
-
-# ****************# The ProductName #****************** #
-
-
-
-
-
-
-
-
-
+# text preprocessing
+df$Review <- tolower(df$Review)
+df$ProductPrice <- scale(df$ProductPrice)
 
 # ********************* The Price ********************* #
 
@@ -373,7 +370,7 @@ colnames(df)
 pattern <- "\\d+(\\.\\d+)?"
 
 # clean the ProductPrice column by extracting numeric values
-# convert the value to double
+# convert data type
 df$ProductPrice <- sapply(df$ProductPrice, function(x) {
   ifelse(grepl(pattern, x), as.double(regmatches(x, regexpr(pattern, x))), NA)
 })
@@ -439,9 +436,80 @@ hist(df$ProductPrice,
   ylim = c(0, max(hist(df$ProductPrice, breaks = breaks)$counts) * 1.1)
 )
 
-
-
-# ********************* Other Col ********************* #
-
+# ********************* The Rate ********************** #
 # itama ang mga data types ng columns
 # linisin ang mga columns data
+
+# ******************** The Review ********************* #
+# itama ang mga data types ng columns
+# linisin ang mga columns data
+
+# ******************* The Sumamry ********************* #
+# itama ang mga data types ng columns
+# linisin ang mga columns data
+
+# ****************** The Sentiment ******************** #
+# itama ang mga data types ng columns
+# linisin ang mga columns data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# testing for data pre-processing TESTING LNG POOOO************************
+library(caret)
+
+
+# DATA SPLITTING
+# Split data into training and testing subsets
+set.seed(123) # set a seed for reproducibility
+trainIndexdf <- createDataPartition(df$Sentiment, p = 0.8, list = FALSE)
+traindf <- df[trainIndexdf, ]
+testdf <- df[-trainIndexdf, ]
+
+
+# PRE-PROCESSING:
+# Pre-process data
+preProcdf <- preProcess(traindf[, -5], method = c("center", "scale", "pca"))
+
+# Apply pre-processing to training and testing data
+trainTransformeddf <- predict(preProcdf, traindf[, -5])
+testTransformeddf <- predict(preProcdf, testdf[, -5])
+
+
+# Train a predictive model
+modeldf <- train(Sentiment ~ ., data = trainTransformeddf, method = "rf", trControl = trainControl(method = "cv"))
+
+
+# Set up cross-validation
+ctrldf <- trainControl(method = "cv", number = 5)
+
+
+# Make predictions on test data
+predictionsdf <- predict(modeldf, testdf)
+
+
+# Compute confusion matrix and other performance measures
+cmdf <- confusionMatrix(predictionsdf, testdf$Sentiment)
+cmdf
