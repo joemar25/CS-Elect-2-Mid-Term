@@ -338,6 +338,16 @@ ggplot(top_summary, aes(x = Summary, y = n)) +
 
 # ****************** Data Pre-Process ***************** #
 
+# load necessary libraries for cleaning the text
+if (!require(ggplot2)) install.packages("ggplot2")
+library(ggplot2)
+
+if (!require(tm)) install.packages("tm")
+library(tm)
+
+if (!require(textstem)) install.packages("textstem")
+library(textstem)
+
 # start
 df <- read.csv("dataset.csv")
 
@@ -350,7 +360,17 @@ sum(is.na(df))
 # *********************** General ********************* #
 
 # remove unnecessary columns
-df <- subset(df, select = c("ProductName", "ProductPrice", "Rate", "Summary", "Sentiment"))
+df <- subset(df, select = c("kzProductName", "ProductPrice", "Rate", "Summary", "Sentiment"))
+
+# text pre-processing (lowering text)
+df$kzProductName <- tolower(df$kzProductName)
+head(df$kzProductName, 5)
+
+df$Summary <- tolower(df$Summary)
+head(df$Summary, 5)
+
+df$Sentiment <- tolower(df$Sentiment)
+head(df$Sentiment, 5)
 
 # ***************** The ProductName ******************* #
 
@@ -360,22 +380,35 @@ colnames(df)[colnames(df) == "kzProductName"] <- "ProductName"
 # verify that the column has been renamed
 colnames(df)
 
-# text preprocessing
-df$Review <- tolower(df$Review)
-df$ProductPrice <- scale(df$ProductPrice)
+# check values
+head(df$ProductName, 5)
 
-# ********************* The Price ********************* #
+# Create a corpus and remove numbers and punctuation
+corpus <- Corpus(VectorSource(df$ProductName))
+corpus <- tm_map(corpus, removeNumbers)
+corpus <- tm_map(corpus, removePunctuation)
 
-# define a regular expression to extract numeric values from strings
-pattern <- "\\d+(\\.\\d+)?"
+# Remove stopwords
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
 
-# clean the ProductPrice column by extracting numeric values
-# convert data type
-df$ProductPrice <- sapply(df$ProductPrice, function(x) {
-  ifelse(grepl(pattern, x), as.double(regmatches(x, regexpr(pattern, x))), NA)
-})
+# Lemmatize the words
+corpus <- tm_map(corpus, function(x) lemmatize_strings(x, pos = "all"))
 
-# check for missing values and inspect corresponding rows
+# Remove extra spaces
+corpus <- tm_map(corpus, stripWhitespace)
+
+# Replace the original column with the cleaned data
+df$ProductName <- unlist(sapply(corpus, as.character))
+
+# check values
+head(df$ProductName, 5)
+
+# ********************* The Price ********************* # 248
+
+# remove non-numeric characters and convert to numeric
+df$ProductPrice <- as.double(gsub("[^0-9.]+", "", df$ProductPrice))
+
+# check for missing values
 missing_indices <- which(is.na(df$ProductPrice))
 df[missing_indices, "ProductPrice"]
 
@@ -393,11 +426,11 @@ mean_price <- mean(df$ProductPrice[!is.na(df$ProductPrice) & !is.na(as.double(df
 sd_price <- sd(df$ProductPrice[!is.na(df$ProductPrice) & !is.na(as.double(df$ProductPrice))])
 
 # print the results
-cat("Valid:", num_valid, "\n")
-cat("Mismatched:", num_mismatched, "\n")
-cat("Missing:", num_missing, "\n")
-cat("Mean:", mean_price, "\n")
-cat("Std. Deviation:", sd_price, "\n")
+print(paste("Valid:", num_valid))
+print(paste("Mismatched:", num_mismatched))
+print(paste("Missing:", num_missing))
+print(paste("Mean:", mean_price))
+print(paste("Std. Deviation:", sd_price))
 
 # calculate the total price
 total_price <- sum(df$ProductPrice, na.rm = TRUE)
@@ -437,27 +470,69 @@ hist(df$ProductPrice,
 )
 
 # ********************* The Rate ********************** #
-# itama ang mga data types ng columns
-# linisin ang mga columns data
+summary(df$Rate)
 
-# ******************* The Sumamry ********************* #
-# itama ang mga data types ng columns
-# linisin ang mga columns data
+# remove non-numeric characters and convert to numeric
+df$Rate <- as.numeric(gsub("[^0-9.]+", "", df$Rate))
+head(df$Rate, 5)
 
-# ****************** The Sentiment ******************** #
-# itama ang mga data types ng columns
-# linisin ang mga columns data
+# Visualize the distribution of Rate using a histogram
+ggplot(df, aes(Rate)) +
+  geom_histogram(binwidth = 1, fill = "blue", alpha = 0.5) +
+  labs(x = "Rating", y = "Count") +
+  ggtitle("Distribution of Ratings")
+
+# Calculate the mean rating
+mean(df$Rate, na.rm = TRUE)
+
+# Calculate the median rating
+median(df$Rate, na.rm = TRUE)
+
+# Calculate the mode rating
+
+if (!require(modeest)) install.packages("modeest")
+
+library(modeest)
+
+mlv(df$Rate)
+
+ggplot(df, aes(y = Rate)) +
+  geom_boxplot(fill = "blue", alpha = 0.5) +
+  labs(y = "Rating") +
+  ggtitle("Distribution of Ratings")
+
+
+# ******************* The Summary ********************* #
+# check values
+head(df$Summary, 5)
+
+# Create a corpus and remove numbers and punctuation
+corpus <- Corpus(VectorSource(df$Summary))
+corpus <- tm_map(corpus, removeNumbers)
+corpus <- tm_map(corpus, removePunctuation)
+
+# Remove stopwords
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
+
+# Lemmatize the words
+corpus <- tm_map(corpus, function(x) lemmatize_strings(x, pos = "all"))
+
+# Remove extra spaces
+corpus <- tm_map(corpus, stripWhitespace)
+
+# Replace the original column with the cleaned data
+df$Summary <- unlist(sapply(corpus, as.character))
+
+df$Summary
+
+# [need to have a spell corrector for more accuracy]
 
 
 
 
 
-
-
-
-
-
-
+# cleaned data frame is named `cleaned_df`
+write.csv(df, file = "clean_data.csv", row.names = FALSE)
 
 
 
@@ -474,38 +549,38 @@ hist(df$ProductPrice,
 
 
 # testing for data pre-processing TESTING LNG POOOO************************
-library(caret)
+# library(caret)
 
 
 # DATA SPLITTING
 # Split data into training and testing subsets
-set.seed(123) # set a seed for reproducibility
-trainIndexdf <- createDataPartition(df$Sentiment, p = 0.8, list = FALSE)
-traindf <- df[trainIndexdf, ]
-testdf <- df[-trainIndexdf, ]
+# set.seed(123) # set a seed for reproducibility
+# trainIndexdf <- createDataPartition(df$Sentiment, p = 0.8, list = FALSE)
+# traindf <- df[trainIndexdf, ]
+# testdf <- df[-trainIndexdf, ]
 
 
 # PRE-PROCESSING:
 # Pre-process data
-preProcdf <- preProcess(traindf[, -5], method = c("center", "scale", "pca"))
+# preProcdf <- preProcess(traindf[, -5], method = c("center", "scale", "pca"))
 
 # Apply pre-processing to training and testing data
-trainTransformeddf <- predict(preProcdf, traindf[, -5])
-testTransformeddf <- predict(preProcdf, testdf[, -5])
+# trainTransformeddf <- predict(preProcdf, traindf[, -5])
+# testTransformeddf <- predict(preProcdf, testdf[, -5])
 
 
 # Train a predictive model
-modeldf <- train(Sentiment ~ ., data = trainTransformeddf, method = "rf", trControl = trainControl(method = "cv"))
+# modeldf <- train(Sentiment ~ ., data = trainTransformeddf, method = "rf", trControl = trainControl(method = "cv"))
 
 
 # Set up cross-validation
-ctrldf <- trainControl(method = "cv", number = 5)
+# ctrldf <- trainControl(method = "cv", number = 5)
 
 
 # Make predictions on test data
-predictionsdf <- predict(modeldf, testdf)
+# predictionsdf <- predict(modeldf, testdf)
 
 
 # Compute confusion matrix and other performance measures
-cmdf <- confusionMatrix(predictionsdf, testdf$Sentiment)
-cmdf
+# cmdf <- confusionMatrix(predictionsdf, testdf$Sentiment)
+# cmdf
