@@ -1,28 +1,55 @@
-
-install.packages("dplyr")
-install.packages("tidytext")
-library(tidytext)
-library(dplyr)
-
-
 # Load the cleaned data
 df <- read.csv("clean_data.csv", stringsAsFactors = FALSE)
 
 summary(df)
 
-tidy_data <- df %>%
-  unnest_tokens(word, Summary)
+data <- df[, c("Summary", "Sentiment")]
 
-sentiment_lexicon <- get_sentiments("afinn")
 
-sentiment_data <- tidy_data %>%
-  inner_join(sentiment_lexicon, by = "word") %>%
-  group_by(Sentiment) %>%
-  summarize(sentiment_score = sum(value)) %>%
-  ungroup()
 
-library(ggplot2)
 
-ggplot(sentiment_data, aes(x = Sentiment, y = sentiment_score)) +
-  geom_bar(stat = "identity") +
-  labs(title = "Sentiment Analysis", x = "Sentiment", y = "Sentiment Score")
+
+
+
+
+
+
+
+
+
+
+if(!require(caTools)) install.packages("caTools")
+library(caTools)
+set.seed(123)
+split <- sample.split(data$Sentiment, SplitRatio = 0.8)
+train_data <- data[split, ]
+test_data <- data[!split, ]
+
+if(!require(randomForest)) install.packages("randomForest")
+library(randomForest)
+
+if(!require(caret)) install.packages("caret")
+library(caret)
+
+# Train the model
+model <- randomForest(as.factor(Sentiment) ~ ., data = train_data)
+
+# Make predictions on the test data
+predictions <- predict(model, newdata = test_data)
+
+# Convert predictions to a factor with the same levels as test_data$Sentiment
+predictions <- factor(predictions, levels = levels(test_data$Sentiment))
+
+# Evaluate the performance of the model
+confusionMatrix(predictions, test_data$Sentiment)
+
+
+
+
+# depende sa algo kung gano kabilis ma train ung set natin
+
+
+
+
+
+
