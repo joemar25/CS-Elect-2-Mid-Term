@@ -18,18 +18,19 @@ data <- df[, c("Summary", "Sentiment")]
 
 
 
-if(!require(caTools)) install.packages("caTools")
+if (!require(caTools)) install.packages("caTools")
 library(caTools)
+
+if (!require(randomForest)) install.packages("randomForest")
+library(randomForest)
+
+if (!require(caret)) install.packages("caret")
+library(caret)
+
 set.seed(123)
 split <- sample.split(data$Sentiment, SplitRatio = 0.8)
 train_data <- data[split, ]
 test_data <- data[!split, ]
-
-if(!require(randomForest)) install.packages("randomForest")
-library(randomForest)
-
-if(!require(caret)) install.packages("caret")
-library(caret)
 
 # Train the model
 model <- randomForest(as.factor(Sentiment) ~ ., data = train_data)
@@ -47,9 +48,3 @@ confusionMatrix(predictions, test_data$Sentiment)
 
 
 # depende sa algo kung gano kabilis ma train ung set natin
-
-
-
-
-
-
