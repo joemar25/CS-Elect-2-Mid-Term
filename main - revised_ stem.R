@@ -217,20 +217,20 @@ df <- df[!is.na(df$ProductPrice), ]
 
 # define breaks based on available values
 breaks <- seq(min(unique(df$ProductPrice)),
-  max(unique(df$ProductPrice)),
-  length.out = 10
+              max(unique(df$ProductPrice)),
+              length.out = 10
 )
 
 # create histogram with customized options
 hist(df$ProductPrice,
-  breaks = breaks,
-  col = "lightblue",
-  border = "white",
-  main = "Distribution of Product Prices",
-  xlab = "Price (in USD)",
-  ylab = "Count",
-  xlim = c(min(breaks), max(breaks)),
-  ylim = c(0, max(hist(df$ProductPrice, breaks = breaks)$counts) * 1.1)
+     breaks = breaks,
+     col = "lightblue",
+     border = "white",
+     main = "Distribution of Product Prices",
+     xlab = "Price (in USD)",
+     ylab = "Count",
+     xlim = c(min(breaks), max(breaks)),
+     ylim = c(0, max(hist(df$ProductPrice, breaks = breaks)$counts) * 1.1)
 )
 
 # price representation - will be represented again when it is cleaned to see differences
@@ -360,13 +360,14 @@ sum(is.na(df))
 # *********************** General ********************* #
 
 # remove unnecessary columns
-df <- subset(df, select = c("kzProductName", "ProductPrice", "Rate", "Summary", "Sentiment"))
+df <- subset(df, select = c("ProductName", "ProductPrice", "Rate", "Summary", "Sentiment"))
 
 # text pre-processing (lowering text)
-df$kzProductName <- tolower(df$kzProductName)
+library(stringi)
+df$kzProductName <- stri_trans_tolower(df$ProductName)
 head(df$kzProductName, 5)
 
-df$Summary <- tolower(df$Summary)
+df$Summary <- stri_trans_tolower(df$Summary)
 head(df$Summary, 5)
 
 df$Sentiment <- tolower(df$Sentiment)
@@ -453,21 +454,26 @@ cat("The highest price is", highest_price, "\n")
 
 # define breaks based on available values
 breaks <- seq(min(unique(df$ProductPrice)),
-  max(unique(df$ProductPrice)),
-  length.out = 10
+              max(unique(df$ProductPrice)),
+              length.out = 10
 )
 
 # create histogram with customized options
+par(mar = c(5, 4, 4, 2) + 0.1)
+png("myplot.png", width = 800, height = 600)
+
 hist(df$ProductPrice,
-  breaks = breaks,
-  col = "lightblue",
-  border = "white",
-  main = "Distribution of Product Prices",
-  xlab = "Price (in USD)",
-  ylab = "Count",
-  xlim = c(min(breaks), max(breaks)),
-  ylim = c(0, max(hist(df$ProductPrice, breaks = breaks)$counts) * 1.1)
+     breaks = breaks,
+     col = "lightblue",
+     border = "white",
+     main = "Distribution of Product Prices",
+     xlab = "Price (in USD)",
+     ylab = "Count",
+     xlim = c(min(breaks), max(breaks)),
+     ylim = c(0, max(hist(df$ProductPrice, breaks = breaks)$counts) * 1.1)
 )
+
+dev.off()
 
 # ********************* The Rate ********************** #
 summary(df$Rate)
@@ -481,6 +487,7 @@ ggplot(df, aes(Rate)) +
   geom_histogram(binwidth = 1, fill = "blue", alpha = 0.5) +
   labs(x = "Rating", y = "Count") +
   ggtitle("Distribution of Ratings")
+
 
 # Calculate the mean rating
 mean(df$Rate, na.rm = TRUE)
