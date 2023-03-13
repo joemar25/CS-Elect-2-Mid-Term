@@ -35,6 +35,22 @@ So the entire pattern "\\d+(\\.\\d+)?" matches any number with or without a deci
 
 
 
+findings
+changing sparse terms
 
+lemma words
+changing sparse terms to 0.90 leads to 68% of accuracy
+			 0.95 -> 75%
+
+stem words
+                         0.91 -> 67
+                         0.92 -> 67
+                         0.93 -> 67
+                         0.94 -> 71
+                         0.95 -> 72
+                         0.96 -> 73
+                         0.97 -> 74
+                         0.98 -> 78
+                         0.99 -> 80
 
 
