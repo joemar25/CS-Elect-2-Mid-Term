@@ -533,3 +533,4 @@ df$Summary
 
 # cleaned data frame is named `cleaned_df`
 write.csv(df, file = "clean_data.csv", row.names = FALSE)
+
