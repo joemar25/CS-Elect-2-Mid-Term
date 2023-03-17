@@ -1,7 +1,5 @@
 # *************** Data Mining Mid Term **************** #
 #                                                       #
-#                       Title                           #
-#                                                       #
 #                   Group Members                       #
 #             Altamera, Kristel Suzeth                  #
 #                   Cardiño, Joemar                     #
@@ -10,58 +8,6 @@
 #             San Joaquin, Gabriel Jean                 #
 #                                                       #
 # ***************************************************** #
-
-
-# ***************************************************** #
-# Our FOCUS is Finance & Ecommerce                      #
-# IDENTIFY: what is the business tasks?                 #
-#           what is the problem?                        #
-#           what needed to solve it?                    #
-# TASK:                                                 #
-# - check kung biased ba ung dataset or hindi           #
-# - idenfy kung ilan at ano ang mga items               #
-# - icategorize kung ilan ito tas bilang ulit           #
-#                                                       #
-# - based sa items na nasa dataset - i gogroup ito;     #
-# - tas kunin ung total sentiment analysis para dito    #
-#   sa group items                                      #
-# - so makiktia kung ung item ba ay                     #
-#   positive/negative/neutral para sa mga users         #
-# - sa part na to, pwedi natin ma conclude or isabi     #
-#   ung mga sulit or hindi na items na pwedi bilhin     #
-#   dito sa shop                                        #
-# - ung negative sentiment saka positive bilangin ung   #
-#   total price para sakanila, tignan kung sulit nga    #
-#   ba ung pagkabili                                    #
-# - tas ung overall total                               #
-# - the most negative item(s) that shown here to the    #
-#   company act. thus only sell good products (gaya sa  #
-#   lazada/shoppee) not all items are good since may    #
-#   mga scam jan. so para dina mabili ung item pwedi    #
-#   na alisin ung product na puro negative ang review   #
-#   or anuman                                           #
-#                                                       #
-# - sa nakita na may pinaka madami na item na           #
-#   positive - pwedi ito magamit as advertisement sa    #
-#   site                                                #
-# - understand customers buying habbits (if possible)   #
-# - alin ung top item sa company na pedi i advertised   #
-#                                                       #
-# - train using the dataset to identify the sentiment   #
-#                                                       #
-# NOTE                                                  #
-# - tanong tayo ng madami para mas malaman ung problem  #
-#   saka goal                                           #
-#                                                       #
-# ***************************************************** #
-
-
-
-
-
-
-
-
 
 
 # ****************** Data Exploration ***************** #
@@ -85,6 +31,9 @@ str(df)
 # checking dataset of each columns
 # we can see the columns if has missing values
 summary(df)
+
+head(df$kzProductName, 5)
+head(df$Summary, 5)
 
 # obs and var
 obs_count <- nrow(df)
@@ -388,7 +337,7 @@ corpus <- Corpus(VectorSource(df$ProductName))
 corpus <- tm_map(corpus, removeNumbers)
 corpus <- tm_map(corpus, removePunctuation)
 
-# Remove stopwords
+# Remove stopwords  as is
 corpus <- tm_map(corpus, removeWords, stopwords("english"))
 
 # Lemmatize the words

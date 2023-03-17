@@ -89,11 +89,12 @@ cat("F1-score:", round(f1_score, 2), "\n")
 sentiment_labels <- c("positive", "negative")
 
 # Preprocess new summary
-new_summary <- "this is a good product"
+new_summary <- "this is a bad product"
 new_corpus <- Corpus(VectorSource(new_summary))
 new_dtm <- DocumentTermMatrix(new_corpus, control = list(stopwords = TRUE, minDocFreq = 10))
 new_dtm <- removeSparseTerms(new_dtm, 0.99)
 new_dtm <- as.matrix(new_dtm)
+
 
 # Predict sentiment of new summary using trained model
 new_pred <- predict(nb_model, newdata = new_dtm)
