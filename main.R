@@ -54,6 +54,34 @@ head(df$Review, 5)
 head(df$Summary, 5)
 head(df$Sentiment, 5)
 
+
+
+
+########## decision tree - before pre-processing
+# Load required library
+library(rpart)
+
+# Split data into training and testing sets
+set.seed(123)
+train_indices <- sample(nrow(df), nrow(df) * 0.8)
+train_data <- df[train_indices, ]
+test_data <- df[-train_indices, ]
+
+# Train the decision tree model
+tree_model <- rpart(Sentiment ~ ., data = train_data, method = "class")
+
+# Plot the decision tree
+library(rpart.plot)
+rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5)
+rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.55)
+
+
+
+
+
+
+
+
 # ******************** The Sentiment ****************** #
 
 unique(df$Sentiment)
@@ -149,7 +177,7 @@ formatted_price <- paste0(
 )
 
 # print the formatted total price
-formatted_price # this is suppoed to be $895,321,820 when data is cleaned for ProductPrice
+formatted_price # this is suppoed to be $935,082,929 when data is cleaned for ProductPrice
 
 # find the lowest price
 lowest_price <- min(df$ProductPrice, na.rm = TRUE)
@@ -475,6 +503,49 @@ df$Summary <- unlist(sapply(corpus, as.character))
 df$Summary
 
 # [need to have a spell corrector for more accuracy]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+########## decision tree - after pre-processing - unbalanced, part 2 in training
+# Load required library
+library(rpart)
+
+# Split data into training and testing sets
+set.seed(123)
+train_indices <- sample(nrow(df), nrow(df) * 0.8)
+train_data <- df[train_indices, ]
+test_data <- df[-train_indices, ]
+
+# Train the decision tree model
+tree_model <- rpart(Sentiment ~ ., data = train_data, method = "class")
+
+# Plot the decision tree
+library(rpart.plot)
+rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5)
+rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.55)
+
+
+
+
+
+
+
+
+
+
 
 
 

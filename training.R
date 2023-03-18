@@ -1,21 +1,6 @@
-# Naive Bayes
+library(rpart)
+library(rpart.plot)
 
-
-# Load the cleaned data
-df <- read.csv("clean_data.csv", stringsAsFactors = FALSE)
-df <- df[, c("Summary", "Sentiment")]
-df$Sentiment <- factor(df$Sentiment, levels = c("positive", "negative"))
-
-
-# Suppress warning messages
-options(warn = -1)
-
-# Load the required packages
-library(slam)
-library(e1071)
-library(tm)
-
-# Training
 # Load the cleaned data
 df <- read.csv("clean_data.csv", stringsAsFactors = FALSE)
 df <- df[, c("Summary", "Sentiment")]
@@ -23,6 +8,10 @@ df <- df[, c("Summary", "Sentiment")]
 # Split the data by sentiment
 positive_samples <- df[df$Sentiment == "positive", ]
 negative_samples <- df[df$Sentiment == "negative", ]
+
+# neutral is not included so numbers might confuse us
+n_positive <- nrow(df[df$Sentiment == "positive", ])
+n_negative <- nrow(df[df$Sentiment == "negative", ])
 
 # Sample n rows from the positive and negative samples
 n <- min(nrow(positive_samples), nrow(negative_samples))
@@ -48,17 +37,56 @@ dtm <- as.matrix(dtm) # Convert to matrix
 sentiment <- balanced_df$Sentiment
 dtm_sentiment <- cbind(dtm, sentiment)
 
+# Convert dtm_sentiment to a data frame
+dtm_sentiment_df <- as.data.frame(dtm_sentiment)
+
+# Fit the decision tree model
+tree_model <- rpart(sentiment ~ ., data = dtm_sentiment_df, method = "class")
+selected_features <- as.character(rownames(as.data.frame(summary(tree_model)$importance[,4] > 0)))
+dtm_subset <- dtm[, selected_features] # Subset dtm using selected features
+dtm_sentiment <- cbind(dtm_subset, sentiment) # Combine subset dtm with sentiment column
+
+
+# r plot for decision tree (for balanced clean data)
+rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5)
+rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.55)
+
+
+
+
+
+
+
 # Split data into training and testing sets
 set.seed(123)
 train_indices <- sample(nrow(dtm_sentiment), nrow(dtm_sentiment) * 0.8)
-train_data <- dtm_sentiment[train_indices, ]
-test_data <- dtm_sentiment[-train_indices, ]
+train_data <- dtm_sentiment_df[train_indices, ]
+test_data <- dtm_sentiment_df[-train_indices, ]
 
 # Train the Naive Bayes model
-nb_model <- naiveBayes(x = train_data[, -ncol(train_data)], y = train_data[, ncol(train_data)])
+nb_model <- naiveBayes(x = train_data[, 1:(ncol(train_data)-1)], y = train_data[, ncol(train_data)])
 
 # Make predictions on test data
-nb_pred <- predict(nb_model, newdata = test_data[, -ncol(test_data)])
+nb_pred <- predict(nb_model, newdata = test_data[, 1:(ncol(test_data)-1)])
+
+
+
+# decision tree after the model
+# Convert sentiment labels to factor
+train_data$sentiment <- factor(train_data$sentiment)
+
+# Build decision tree
+tree_model <- rpart(sentiment ~ ., data = train_data)
+
+# Plot decision tree
+rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5)
+rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.55)
+
+
+
+
+
+
 
 # Evaluate model performance on test data
 conf_mat <- table(nb_pred, test_data[, ncol(test_data)])
