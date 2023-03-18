@@ -14,10 +14,12 @@
 
 # install required packages and Use Library
 if (!require(ggplot2)) install.packages("ggplot2")
-library(ggplot2)
-
 if (!require(dplyr)) install.packages("dplyr")
+
+library(ggplot2)
 library(dplyr)
+
+
 
 # load the data from the CSV file
 df <- read.csv("dataset.csv")
@@ -57,25 +59,37 @@ head(df$Sentiment, 5)
 
 
 
-########## decision tree - before pre-processing
+# ******************** Decision Tree ****************** #
+# before pre-processing
+
 # Load required library
+if (!require(rpart)) install.packages("rpart")
 library(rpart)
 
-# Split data into training and testing sets
-set.seed(123)
-train_indices <- sample(nrow(df), nrow(df) * 0.8)
-train_data <- df[train_indices, ]
-test_data <- df[-train_indices, ]
+# Create a corpus of the text summaries
+corpus <- Corpus(VectorSource(df$Summary))
 
-# Train the decision tree model
-tree_model <- rpart(Sentiment ~ ., data = train_data, method = "class")
+# Create a document term matrix
+dtm <- DocumentTermMatrix(corpus, control = list(stopwords = TRUE, minDocFreq = 10))
+dtm <- removeSparseTerms(dtm, 0.99) # Remove sparse terms (allocation of memory)
+dtm <- as.matrix(dtm) # Convert to matrix
 
-# Plot the decision tree
-library(rpart.plot)
+# Add sentiment to the matrix
+sentiment <- df$Sentiment
+dtm_sentiment <- cbind(dtm, sentiment)
+
+# Convert dtm_sentiment to a data frame
+dtm_sentiment_df <- as.data.frame(dtm_sentiment)
+
+# Fit the decision tree model
+tree_model <- rpart(sentiment ~ ., data = dtm_sentiment_df, method = "class")
+selected_features <- as.character(rownames(as.data.frame(summary(tree_model)$importance[,4] > 0)))
+dtm_subset <- dtm[, selected_features] # Subset dtm using selected features
+dtm_sentiment <- cbind(dtm_subset, sentiment) # Combine subset dtm with sentiment column
+
+# r plot for decision tree (for balanced clean data)
 rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5)
-rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.55)
-
-
+rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.5)
 
 
 
@@ -316,14 +330,16 @@ ggplot(top_summary, aes(x = Summary, y = n)) +
 # ****************** Data Pre-Process ***************** #
 
 # load necessary libraries for cleaning the text
-if (!require(ggplot2)) install.packages("ggplot2")
-library(ggplot2)
-
 if (!require(tm)) install.packages("tm")
-library(tm)
-
+if (!require(ggplot2)) install.packages("ggplot2")
 if (!require(textstem)) install.packages("textstem")
+
+library(tm)
+library(ggplot2)
 library(textstem)
+
+
+
 
 # start
 df <- read.csv("dataset.csv")

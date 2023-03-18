@@ -1,5 +1,11 @@
+if (!require(tm)) install.packages("tm")
+if (!require(rpart)) install.packages("rpart")
+
+library(tm)
 library(rpart)
 library(rpart.plot)
+
+
 
 # Load the cleaned data
 df <- read.csv("clean_data.csv", stringsAsFactors = FALSE)
@@ -46,10 +52,9 @@ selected_features <- as.character(rownames(as.data.frame(summary(tree_model)$imp
 dtm_subset <- dtm[, selected_features] # Subset dtm using selected features
 dtm_sentiment <- cbind(dtm_subset, sentiment) # Combine subset dtm with sentiment column
 
-
 # r plot for decision tree (for balanced clean data)
 rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5)
-rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.55)
+rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.5)
 
 
 
