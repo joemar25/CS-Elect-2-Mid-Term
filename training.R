@@ -1,9 +1,15 @@
 if (!require(tm)) install.packages("tm")
+if (!require(slam)) install.packages("slam")
+if (!require(e1071)) install.packages("e1071")
 if (!require(rpart)) install.packages("rpart")
 
 library(tm)
+library(tidytext)
+library(slam)
 library(rpart)
 library(rpart.plot)
+
+library(e1071)
 
 
 
@@ -54,7 +60,14 @@ dtm_sentiment <- cbind(dtm_subset, sentiment) # Combine subset dtm with sentimen
 
 # r plot for decision tree (for balanced clean data)
 rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5)
-rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.5)
+rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5, box.col = "transparent", border = "transparent")
+
+
+rpart.plot(tree_model, uniform = TRUE, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.6)
+
+# r plot for decision tree (for balanced clean data) without node boxes and plot border
+rpart.plot(tree_model, uniform = TRUE, extra = 2, fallen.leaves = FALSE, 
+           type = 5, cex = 0.6, box.col = "transparent", border = "transparent")
 
 
 
@@ -85,7 +98,7 @@ tree_model <- rpart(sentiment ~ ., data = train_data)
 
 # Plot decision tree
 rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5)
-rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.55)
+rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.6)
 
 
 
@@ -141,3 +154,4 @@ cat("Predicted sentiment label for new summary:", sentiment_labels[new_pred], "\
 
 # Save the model to a file
 saveRDS(nb_model, file = "nb_model.rds")
+

@@ -15,9 +15,12 @@
 # install required packages and Use Library
 if (!require(ggplot2)) install.packages("ggplot2")
 if (!require(dplyr)) install.packages("dplyr")
+if (!require(textstem)) install.packages("textstem")
 
 library(ggplot2)
 library(dplyr)
+library(textstem)
+
 
 
 
@@ -64,7 +67,15 @@ head(df$Sentiment, 5)
 
 # Load required library
 if (!require(rpart)) install.packages("rpart")
+if (!require(rpart.plot)) install.packages("rpart.plot")
+if (!require(textstem)) install.packages("textstem")
+
+library(tm)
 library(rpart)
+library(rpart.plot)
+
+
+
 
 # Create a corpus of the text summaries
 corpus <- Corpus(VectorSource(df$Summary))
@@ -535,23 +546,47 @@ df$Summary
 
 
 
-########## decision tree - after pre-processing - unbalanced, part 2 in training
+# ******************** Decision Tree ****************** #
 # Load required library
+if (!require(rpart)) install.packages("rpart")
+if (!require(rpart.plot)) install.packages("rpart.plot")
+if (!require(tm)) install.packages("tm")
+
+library(tm)
 library(rpart)
-
-# Split data into training and testing sets
-set.seed(123)
-train_indices <- sample(nrow(df), nrow(df) * 0.8)
-train_data <- df[train_indices, ]
-test_data <- df[-train_indices, ]
-
-# Train the decision tree model
-tree_model <- rpart(Sentiment ~ ., data = train_data, method = "class")
-
-# Plot the decision tree
 library(rpart.plot)
+
+
+
+
+# Create a corpus of the text summaries
+corpus <- Corpus(VectorSource(df$Summary))
+
+# Create a document term matrix
+dtm <- DocumentTermMatrix(corpus, control = list(stopwords = TRUE, minDocFreq = 10))
+dtm <- removeSparseTerms(dtm, 0.99) # Remove sparse terms (allocation of memory)
+dtm <- as.matrix(dtm) # Convert to matrix
+
+# Add sentiment to the matrix
+sentiment <- df$Sentiment
+dtm_sentiment <- cbind(dtm, sentiment)
+
+# Convert dtm_sentiment to a data frame
+dtm_sentiment_df <- as.data.frame(dtm_sentiment)
+
+# Fit the decision tree model
+tree_model <- rpart(sentiment ~ ., data = dtm_sentiment_df, method = "class")
+selected_features <- as.character(rownames(as.data.frame(summary(tree_model)$importance[,4] > 0)))
+dtm_subset <- dtm[, selected_features] # Subset dtm using selected features
+dtm_sentiment <- cbind(dtm_subset, sentiment) # Combine subset dtm with sentiment column
+
+# r plot for decision tree (for balanced clean data)
 rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5)
-rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.55)
+rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.5)
+
+
+
+
 
 
 
