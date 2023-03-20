@@ -13,6 +13,7 @@ library(e1071)
 
 
 
+
 # Load the cleaned data
 df <- read.csv("clean_data.csv", stringsAsFactors = FALSE)
 df <- df[, c("Summary", "Sentiment")]
@@ -61,7 +62,7 @@ dtm_sentiment_df <- as.data.frame(dtm_sentiment)
 
 # Fit the decision tree model
 tree_model <- rpart(sentiment ~ ., data = dtm_sentiment_df, method = "class")
-selected_features <- as.character(rownames(as.data.frame(summary(tree_model)$importance[,4] > 0)))
+selected_features <- as.character(rownames(as.data.frame(summary(tree_model)$importance[, 4] > 0)))
 dtm_subset <- dtm[, selected_features] # Subset dtm using selected features
 dtm_sentiment <- cbind(dtm_subset, sentiment) # Combine subset dtm with sentiment column
 
@@ -74,8 +75,10 @@ rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5, box.col = "transparent", 
 rpart.plot(tree_model, uniform = TRUE, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.6)
 
 # r plot for decision tree (for balanced clean data) without node boxes and plot border
-rpart.plot(tree_model, uniform = TRUE, extra = 2, fallen.leaves = FALSE, 
-           type = 5, cex = 0.6, box.col = "transparent", border = "transparent")
+rpart.plot(tree_model,
+    uniform = TRUE, extra = 2, fallen.leaves = FALSE,
+    type = 5, cex = 0.6, box.col = "transparent", border = "transparent"
+)
 
 
 
@@ -90,10 +93,10 @@ train_data <- dtm_sentiment_df[train_indices, ]
 test_data <- dtm_sentiment_df[-train_indices, ]
 
 # Train the Naive Bayes model
-nb_model <- naiveBayes(x = train_data[, 1:(ncol(train_data)-1)], y = train_data[, ncol(train_data)])
+nb_model <- naiveBayes(x = train_data[, 1:(ncol(train_data) - 1)], y = train_data[, ncol(train_data)])
 
 # Make predictions on test data
-nb_pred <- predict(nb_model, newdata = test_data[, 1:(ncol(test_data)-1)])
+nb_pred <- predict(nb_model, newdata = test_data[, 1:(ncol(test_data) - 1)])
 
 
 
@@ -162,4 +165,3 @@ cat("Predicted sentiment label for new summary:", sentiment_labels[new_pred], "\
 
 # Save the model to a file
 # saveRDS(nb_model, file = "nb_model.rds")
-
