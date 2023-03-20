@@ -1,7 +1,8 @@
-- Overall sentiment analysis per product
-- Sentiment and content analysis
-- predict sentiment spectrum (positive, negative, neutral)
-- rrl on why the tool is used
-- visualization tool
+- [ ] overall sentiment analysis per product
+- [/] sentiment analysis
+- [ ] content analysis
+- [ ] predict sentiment spectrum (positive, neutral)
+- [ ] use visualization tool
+- [ ] identify why positive and negative is better without neutral in out set
 
 <https://mhahsler.github.io/Introduction_to_Data_Mining_R_Examples/book/classification-basic-concepts-and-techniques.html>
