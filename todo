@@ -4,5 +4,7 @@
 - [ ] predict sentiment spectrum (positive, neutral)
 - [ ] use visualization tool
 - [ ] identify why positive and negative is better without neutral in out set
+- [ ] add all team members on github
+- [ ] try ogmenting data to increase data accuracy - since test this: this is a worst product => positive
 
 <https://mhahsler.github.io/Introduction_to_Data_Mining_R_Examples/book/classification-basic-concepts-and-techniques.html>
