@@ -89,11 +89,37 @@ train_indices <- sample(nrow(dtm_sentiment), nrow(dtm_sentiment) * 0.8)
 train_data <- dtm_sentiment_df[train_indices, ]
 test_data <- dtm_sentiment_df[-train_indices, ]
 
+# Convert the dependent variable to a factor
+train_data[, ncol(train_data)] <- as.factor(train_data[, ncol(train_data)])
+test_data[, ncol(test_data)] <- as.factor(test_data[, ncol(test_data)])
+
 # Train the Naive Bayes model
 nb_model <- naiveBayes(x = train_data[, 1:(ncol(train_data) - 1)], y = train_data[, ncol(train_data)])
 
 # Make predictions on test data
 nb_pred <- predict(nb_model, newdata = test_data[, 1:(ncol(test_data) - 1)])
+
+# Get the confusion matrix and calculate performance metrics
+conf_mat <- confusionMatrix(data = nb_pred, reference = test_data[, ncol(test_data)])
+conf_mat
+
+conf_mat_table <- table(nb_pred, test_data[, ncol(test_data)])
+conf_mat_table
+
+accuracy <- conf_mat$overall["Accuracy"] * 100 # Multiply by 100 to get percentage
+accuracy <- round(accuracy, 2)
+precision <- conf_mat$byClass["Precision"]
+recall <- conf_mat$byClass["Recall"]
+f1_score <- conf_mat$byClass["F1"]
+sensitivity <- conf_mat$byClass["Sensitivity"]
+
+# Evaluate model performance on test data
+# Print the evaluation metrics
+cat("Accuracy:", accuracy, "\n")
+cat("Precision:", round(precision, 2), "\n")
+cat("Recall:", round(recall, 2), "\n")
+cat("F1-score:", round(f1_score, 2), "\n")
+cat("Sensitivity:", round(sensitivity, 2), "\n")
 
 
 
@@ -111,24 +137,6 @@ rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.6)
 
 
 
-
-
-
-# Evaluate model performance on test data
-conf_mat <- table(nb_pred, test_data[, ncol(test_data)])
-conf_mat
-
-accuracy <- sum(diag(conf_mat)) / sum(conf_mat) * 100 # Multiply by 100 to get percentage
-accuracy <- round(accuracy, 2)
-precision <- diag(conf_mat) / colSums(conf_mat)
-recall <- diag(conf_mat) / rowSums(conf_mat)
-f1_score <- 2 * precision * recall / (precision + recall)
-
-# Print the evaluation metrics
-cat("Accuracy:", accuracy, "\n")
-cat("Precision:", round(precision, 2), "\n")
-cat("Recall:", round(recall, 2), "\n")
-cat("F1-score:", round(f1_score, 2), "\n")
 
 
 
@@ -162,3 +170,4 @@ cat("Predicted sentiment label for new summary:", sentiment_labels[new_pred], "\
 
 # Save the model to a file
 # saveRDS(nb_model, file = "nb_model.rds")
+

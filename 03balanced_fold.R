@@ -37,17 +37,19 @@ n <- min(nrow(positive_samples), nrow(negative_samples))
 positive_samples_subset <- positive_samples[sample(nrow(positive_samples), n), ]
 negative_samples_subset <- negative_samples[sample(nrow(negative_samples), n), ]
 
+nrow(positive_samples_subset)
+nrow(negative_samples_subset)
 
 # Combine the samples into a balanced dataset
-unbalanced_df <- rbind(positive_samples_subset, negative_samples_subset)
+balanced_df <- rbind(positive_samples_subset, negative_samples_subset)
 
 # Shuffle the rows of the balanced dataset
-unbalanced_df <- unbalanced_df[sample(nrow(unbalanced_df)), ]
-unbalanced_df$Sentiment <- factor(unbalanced_df$Sentiment, levels = c("positive", "negative"))
+balanced_df <- balanced_df[sample(nrow(balanced_df)), ]
+balanced_df$Sentiment <- factor(balanced_df$Sentiment, levels = c("positive", "negative"))
 
 
 # Create a corpus of the text summaries
-corpus <- Corpus(VectorSource(unbalanced_df$Summary))
+corpus <- Corpus(VectorSource(balanced_df$Summary))
 
 # Create a document term matrix
 dtm <- DocumentTermMatrix(corpus, control = list(stopwords = TRUE, minDocFreq = 10))
@@ -56,7 +58,7 @@ dtm <- as.matrix(dtm) # Convert to matrix
 
 
 # Add sentiment to the matrix
-sentiment <- unbalanced_df$Sentiment
+sentiment <- balanced_df$Sentiment
 dtm_sentiment <- cbind(dtm, sentiment)
 
 
@@ -89,49 +91,44 @@ rpart.plot(tree_model,
 
 
 
-# welcome to folding
-# Define the number of folds
-k <- 5
+# folding
+# Split data into training and testing sets
+set.seed(123)
+train_indices <- sample(nrow(dtm_sentiment), nrow(dtm_sentiment) * 0.8)
+train_data <- dtm_sentiment_df[train_indices, ]
+test_data <- dtm_sentiment_df[-train_indices, ]
 
-# Create a vector of row indices
-indices <- sample(rep(1:k, length.out = nrow(dtm_sentiment_df)))
+# Convert the dependent variable to a factor
+train_data[, ncol(train_data)] <- as.factor(train_data[, ncol(train_data)])
+test_data[, ncol(test_data)] <- as.factor(test_data[, ncol(test_data)])
 
-# Initialize a vector to store the evaluation metrics
-accuracy_vec <- numeric(k)
-precision_vec <- numeric(k)
-recall_vec <- numeric(k)
-f1_score_vec <- numeric(k)
+# Train the Naive Bayes model
+nb_model <- naiveBayes(x = train_data[, 1:(ncol(train_data) - 1)], y = train_data[, ncol(train_data)])
 
-# Perform k-fold cross-validation
-for (i in 1:k) {
-  # Split data into training and testing sets
-  test_data <- dtm_sentiment_df[indices == i, ]
-  train_data <- dtm_sentiment_df[indices != i, ]
-  
-  # Train the Naive Bayes model
-  nb_model <- naiveBayes(x = train_data[, 1:(ncol(train_data) - 1)], y = train_data[, ncol(train_data)])
-  
-  # Make predictions on test data
-  nb_pred <- predict(nb_model, newdata = test_data[, 1:(ncol(test_data) - 1)])
-  
-  # Evaluate model performance on test data
-  conf_mat <- table(nb_pred, test_data[, ncol(test_data)])
-  
-  accuracy_vec[i] <- sum(diag(conf_mat)) / sum(conf_mat) * 100 # Multiply by 100 to get percentage
-  accuracy_vec[i] <- round(accuracy_vec[i], 2)
-  precision_vec[i] <- diag(conf_mat) / colSums(conf_mat)
-  recall_vec[i] <- diag(conf_mat) / rowSums(conf_mat)
-  f1_score_vec[i] <- 2 * precision_vec[i] * recall_vec[i] / (precision_vec[i] + recall_vec[i])
-}
+# Make predictions on test data
+nb_pred <- predict(nb_model, newdata = test_data[, 1:(ncol(test_data) - 1)])
 
-# Calculate the mean evaluation metrics across the folds
-accuracy <- mean(accuracy_vec)
-precision <- mean(precision_vec)
-recall <- mean(recall_vec)
-f1_score <- mean(f1_score_vec)
+# Get the confusion matrix and calculate performance metrics
+conf_mat <- confusionMatrix(data = nb_pred, reference = test_data[, ncol(test_data)])
+conf_mat
 
+conf_mat_table <- table(nb_pred, test_data[, ncol(test_data)])
+conf_mat_table
 
+accuracy <- conf_mat$overall["Accuracy"] * 100 # Multiply by 100 to get percentage
+accuracy <- round(accuracy, 2)
+precision <- conf_mat$byClass["Precision"]
+recall <- conf_mat$byClass["Recall"]
+f1_score <- conf_mat$byClass["F1"]
+sensitivity <- conf_mat$byClass["Sensitivity"]
 
+# Evaluate model performance on test data
+# Print the evaluation metrics
+cat("Accuracy:", accuracy, "\n")
+cat("Precision:", round(precision, 2), "\n")
+cat("Recall:", round(recall, 2), "\n")
+cat("F1-score:", round(f1_score, 2), "\n")
+cat("Sensitivity:", round(sensitivity, 2), "\n")
 
 
 
@@ -156,12 +153,7 @@ rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.6)
 
 
 
-# Evaluate model performance on test data
-# Print the evaluation metrics
-cat("Accuracy:", accuracy, "\n")
-cat("Precision:", round(precision, 2), "\n")
-cat("Recall:", round(recall, 2), "\n")
-cat("F1-score:", round(f1_score, 2), "\n")
+
 
 
 
@@ -176,7 +168,7 @@ cat("F1-score:", round(f1_score, 2), "\n")
 sentiment_labels <- c("positive", "negative")
 
 # Preprocess new summary
-new_summary <- "this is a bad product"
+new_summary <- "this is a good product"
 new_corpus <- Corpus(VectorSource(new_summary))
 new_dtm <- DocumentTermMatrix(new_corpus, control = list(stopwords = TRUE, minDocFreq = 10))
 new_dtm <- removeSparseTerms(new_dtm, 0.99)

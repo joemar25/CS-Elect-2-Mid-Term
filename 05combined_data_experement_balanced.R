@@ -59,8 +59,8 @@ rpart.plot(tree_model, uniform = TRUE, extra = 2, fallen.leaves = FALSE, type = 
 
 # r plot for decision tree (for balanced clean data) without node boxes and plot border
 rpart.plot(tree_model,
-    uniform = TRUE, extra = 2, fallen.leaves = FALSE,
-    type = 5, cex = 0.6, box.col = "transparent", border = "transparent"
+           uniform = TRUE, extra = 2, fallen.leaves = FALSE,
+           type = 5, cex = 0.6, box.col = "transparent", border = "transparent"
 )
 
 
