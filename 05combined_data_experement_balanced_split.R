@@ -22,12 +22,33 @@ df <- read.csv("combined_data_for_sentiment.csv", stringsAsFactors = FALSE)
 
 summary(df)
 
+# Split the data by sentiment
+positive_samples <- df[df$Sentiment == "positive", ]
+negative_samples <- df[df$Sentiment == "negative", ]
+
 n_positive <- nrow(df[df$Sentiment == "positive", ])
+n_positive
 n_negative <- nrow(df[df$Sentiment == "negative", ])
+n_negative
+
+# Sample n rows from the positive and negative samples
+n <- min(nrow(positive_samples), nrow(negative_samples))
+n
+
+positive_samples_subset <- positive_samples[sample(nrow(positive_samples), n), ]
+negative_samples_subset <- negative_samples[sample(nrow(negative_samples), n), ]
+
+
+# Combine the samples into a balanced dataset
+balanced_df <- rbind(positive_samples_subset, negative_samples_subset)
+
+# Shuffle the rows of the balanced dataset
+balanced_df <- balanced_df[sample(nrow(balanced_df)), ]
+balanced_df$Sentiment <- factor(balanced_df$Sentiment, levels = c("positive", "negative"))
 
 
 # Create a corpus of the text summaries
-corpus <- Corpus(VectorSource(df$Summary))
+corpus <- Corpus(VectorSource(balanced_df$Summary))
 
 # Create a document term matrix
 dtm <- DocumentTermMatrix(corpus, control = list(stopwords = TRUE, minDocFreq = 10))
@@ -36,7 +57,7 @@ dtm <- as.matrix(dtm) # Convert to matrix
 
 
 # Add sentiment to the matrix
-sentiment <- df$Sentiment
+sentiment <- balanced_df$Sentiment
 dtm_sentiment <- cbind(dtm, sentiment)
 
 
@@ -106,6 +127,11 @@ cat("Precision:", round(precision, 2), "\n")
 cat("Recall:", round(recall, 2), "\n")
 cat("F1-score:", round(f1_score, 2), "\n")
 cat("Sensitivity:", round(sensitivity, 2), "\n")
+
+
+
+
+
 
 
 

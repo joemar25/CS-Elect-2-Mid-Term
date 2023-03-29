@@ -34,6 +34,7 @@ n_negative <- nrow(df[df$Sentiment == "negative", ])
 
 # Sample n rows from the positive and negative samples
 n <- min(nrow(positive_samples), nrow(negative_samples))
+n
 positive_samples_subset <- positive_samples[sample(nrow(positive_samples), n), ]
 negative_samples_subset <- negative_samples[sample(nrow(negative_samples), n), ]
 
@@ -126,6 +127,10 @@ cat("Precision:", round(precision, 2), "\n")
 cat("Recall:", round(recall, 2), "\n")
 cat("F1-score:", round(f1_score, 2), "\n")
 cat("Sensitivity:", round(sensitivity, 2), "\n")
+
+
+
+
 
 
 

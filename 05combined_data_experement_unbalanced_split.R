@@ -18,7 +18,7 @@ library(e1071)
 
 
 # Load the cleaned data
-df <- read.csv("clean_data.csv", stringsAsFactors = FALSE)
+df <- read.csv("combined_data_for_sentiment.csv", stringsAsFactors = FALSE)
 df <- df[, c("Summary", "Sentiment")]
 
 
@@ -33,23 +33,19 @@ n_negative <- nrow(df[df$Sentiment == "negative", ])
 
 
 # Sample n rows from the positive and negative samples
-n <- min(nrow(positive_samples), nrow(negative_samples))
-positive_samples_subset <- positive_samples[sample(nrow(positive_samples), n), ]
-negative_samples_subset <- negative_samples[sample(nrow(negative_samples), n), ]
-
-nrow(positive_samples_subset)
-nrow(negative_samples_subset)
+positive_samples_subset <- positive_samples[sample(nrow(positive_samples), ), ]
+negative_samples_subset <- negative_samples[sample(nrow(negative_samples), ), ]
 
 # Combine the samples into a balanced dataset
-balanced_df <- rbind(positive_samples_subset, negative_samples_subset)
+unbalanced_df <- rbind(positive_samples_subset, negative_samples_subset)
 
 # Shuffle the rows of the balanced dataset
-balanced_df <- balanced_df[sample(nrow(balanced_df)), ]
-balanced_df$Sentiment <- factor(balanced_df$Sentiment, levels = c("positive", "negative"))
+unbalanced_df <- unbalanced_df[sample(nrow(unbalanced_df)), ]
+unbalanced_df$Sentiment <- factor(unbalanced_df$Sentiment, levels = c("positive", "negative"))
 
 
 # Create a corpus of the text summaries
-corpus <- Corpus(VectorSource(balanced_df$Summary))
+corpus <- Corpus(VectorSource(unbalanced_df$Summary))
 
 # Create a document term matrix
 dtm <- DocumentTermMatrix(corpus, control = list(stopwords = TRUE, minDocFreq = 10))
@@ -58,7 +54,7 @@ dtm <- as.matrix(dtm) # Convert to matrix
 
 
 # Add sentiment to the matrix
-sentiment <- balanced_df$Sentiment
+sentiment <- unbalanced_df$Sentiment
 dtm_sentiment <- cbind(dtm, sentiment)
 
 
@@ -91,29 +87,27 @@ rpart.plot(tree_model,
 
 
 
-# folding
-library(caret)
+# Split data into training and testing sets
+set.seed(123)
+train_indices <- sample(nrow(dtm_sentiment), nrow(dtm_sentiment) * 0.8)
+train_data <- dtm_sentiment_df[train_indices, ]
+test_data <- dtm_sentiment_df[-train_indices, ]
 
 # Convert the dependent variable to a factor
-dtm_sentiment_df[, ncol(dtm_sentiment_df)] <- as.factor(dtm_sentiment_df[, ncol(dtm_sentiment_df)])
+train_data[, ncol(train_data)] <- as.factor(train_data[, ncol(train_data)])
+test_data[, ncol(test_data)] <- as.factor(test_data[, ncol(test_data)])
 
-# Define the number of folds
-k <- 5
+# Train the Naive Bayes model
+nb_model <- naiveBayes(x = train_data[, 1:(ncol(train_data) - 1)], y = train_data[, ncol(train_data)])
 
-# Create a train control object for k-fold cross-validation
-train_control <- trainControl(method = "cv", number = k)
-
-# Train the Naive Bayes model using k-fold cross-validation
-nb_model <- train(x = dtm_sentiment_df[, 1:(ncol(dtm_sentiment_df) - 1)], y = dtm_sentiment_df[, ncol(dtm_sentiment_df)], method = "naive_bayes", trControl = train_control)
-
-# Make predictions on the test set
-nb_pred <- predict(nb_model, newdata = dtm_sentiment_df[, 1:(ncol(dtm_sentiment_df) - 1)])
+# Make predictions on test data
+nb_pred <- predict(nb_model, newdata = test_data[, 1:(ncol(test_data) - 1)])
 
 # Get the confusion matrix and calculate performance metrics
-conf_mat <- confusionMatrix(data = nb_pred, reference = dtm_sentiment_df[, ncol(dtm_sentiment_df)])
+conf_mat <- confusionMatrix(data = nb_pred, reference = test_data[, ncol(test_data)])
 conf_mat
 
-conf_mat_table <- table(nb_pred, dtm_sentiment_df[, ncol(dtm_sentiment_df)])
+conf_mat_table <- table(nb_pred, test_data[, ncol(test_data)])
 conf_mat_table
 
 accuracy <- conf_mat$overall["Accuracy"] * 100 # Multiply by 100 to get percentage
@@ -130,7 +124,6 @@ cat("Precision:", round(precision, 2), "\n")
 cat("Recall:", round(recall, 2), "\n")
 cat("F1-score:", round(f1_score, 2), "\n")
 cat("Sensitivity:", round(sensitivity, 2), "\n")
-
 
 
 
@@ -163,19 +156,13 @@ rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.6)
 
 
 
-
-
-
-
-
-
 # testing the model
 
 # Define the text labels
 sentiment_labels <- c("positive", "negative")
 
 # Preprocess new summary
-new_summary <- "this is a good product"
+new_summary <- "this is a bad product"
 new_corpus <- Corpus(VectorSource(new_summary))
 new_dtm <- DocumentTermMatrix(new_corpus, control = list(stopwords = TRUE, minDocFreq = 10))
 new_dtm <- removeSparseTerms(new_dtm, 0.99)

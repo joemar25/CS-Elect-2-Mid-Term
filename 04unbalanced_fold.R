@@ -87,46 +87,46 @@ rpart.plot(tree_model,
 
 
 
-# welcome to folding
+# folding
+library(caret)
+
+# Convert the dependent variable to a factor
+dtm_sentiment_df[, ncol(dtm_sentiment_df)] <- as.factor(dtm_sentiment_df[, ncol(dtm_sentiment_df)])
+
 # Define the number of folds
 k <- 5
 
-# Create a vector of row indices
-indices <- sample(rep(1:k, length.out = nrow(dtm_sentiment_df)))
+# Create a train control object for k-fold cross-validation
+train_control <- trainControl(method = "cv", number = k)
 
-# Initialize a vector to store the evaluation metrics
-accuracy_vec <- numeric(k)
-precision_vec <- numeric(k)
-recall_vec <- numeric(k)
-f1_score_vec <- numeric(k)
+# Train the Naive Bayes model using k-fold cross-validation
+nb_model <- train(x = dtm_sentiment_df[, 1:(ncol(dtm_sentiment_df) - 1)], y = dtm_sentiment_df[, ncol(dtm_sentiment_df)], method = "naive_bayes", trControl = train_control)
 
-# Perform k-fold cross-validation
-for (i in 1:k) {
-  # Split data into training and testing sets
-  test_data <- dtm_sentiment_df[indices == i, ]
-  train_data <- dtm_sentiment_df[indices != i, ]
-  
-  # Train the Naive Bayes model
-  nb_model <- naiveBayes(x = train_data[, 1:(ncol(train_data) - 1)], y = train_data[, ncol(train_data)])
-  
-  # Make predictions on test data
-  nb_pred <- predict(nb_model, newdata = test_data[, 1:(ncol(test_data) - 1)])
-  
-  # Evaluate model performance on test data
-  conf_mat <- table(nb_pred, test_data[, ncol(test_data)])
-  
-  accuracy_vec[i] <- sum(diag(conf_mat)) / sum(conf_mat) * 100 # Multiply by 100 to get percentage
-  accuracy_vec[i] <- round(accuracy_vec[i], 2)
-  precision_vec[i] <- diag(conf_mat) / colSums(conf_mat)
-  recall_vec[i] <- diag(conf_mat) / rowSums(conf_mat)
-  f1_score_vec[i] <- 2 * precision_vec[i] * recall_vec[i] / (precision_vec[i] + recall_vec[i])
-}
+# Make predictions on the test set
+nb_pred <- predict(nb_model, newdata = dtm_sentiment_df[, 1:(ncol(dtm_sentiment_df) - 1)])
 
-# Calculate the mean evaluation metrics across the folds
-accuracy <- mean(accuracy_vec)
-precision <- mean(precision_vec)
-recall <- mean(recall_vec)
-f1_score <- mean(f1_score_vec)
+# Get the confusion matrix and calculate performance metrics
+conf_mat <- confusionMatrix(data = nb_pred, reference = dtm_sentiment_df[, ncol(dtm_sentiment_df)])
+conf_mat
+
+conf_mat_table <- table(nb_pred, dtm_sentiment_df[, ncol(dtm_sentiment_df)])
+conf_mat_table
+
+accuracy <- conf_mat$overall["Accuracy"] * 100 # Multiply by 100 to get percentage
+accuracy <- round(accuracy, 2)
+precision <- conf_mat$byClass["Precision"]
+recall <- conf_mat$byClass["Recall"]
+f1_score <- conf_mat$byClass["F1"]
+sensitivity <- conf_mat$byClass["Sensitivity"]
+
+# Evaluate model performance on test data
+# Print the evaluation metrics
+cat("Accuracy:", accuracy, "\n")
+cat("Precision:", round(precision, 2), "\n")
+cat("Recall:", round(recall, 2), "\n")
+cat("F1-score:", round(f1_score, 2), "\n")
+cat("Sensitivity:", round(sensitivity, 2), "\n")
+
 
 
 
@@ -148,18 +148,6 @@ tree_model <- rpart(sentiment ~ ., data = train_data)
 rpart.plot(tree_model, extra = 2, type = 5, cex = 0.5)
 rpart.plot(tree_model, extra = 2, fallen.leaves = FALSE, type = 5, cex = 0.6)
 
-
-
-
-
-
-
-# Evaluate model performance on test data
-# Print the evaluation metrics
-cat("Accuracy:", accuracy, "\n")
-cat("Precision:", round(precision, 2), "\n")
-cat("Recall:", round(recall, 2), "\n")
-cat("F1-score:", round(f1_score, 2), "\n")
 
 
 
