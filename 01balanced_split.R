@@ -91,6 +91,7 @@ rpart.plot(tree_model,
 
 
 # Split data into training and testing sets
+library(caret)
 set.seed(123)
 train_indices <- sample(nrow(dtm_sentiment), nrow(dtm_sentiment) * 0.8)
 train_data <- dtm_sentiment_df[train_indices, ]

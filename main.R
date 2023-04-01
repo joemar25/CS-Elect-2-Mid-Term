@@ -376,36 +376,39 @@ head(df$Summary, 5)
 df$Sentiment <- tolower(df$Sentiment)
 head(df$Sentiment, 5)
 
-# ***************** The ProductName ******************* #
 
-# rename the kzProductName column to ProductName
-colnames(df)[colnames(df) == "kzProductName"] <- "ProductName"
 
-# verify that the column has been renamed
-colnames(df)
 
-# check values
-head(df$ProductName, 5)
 
-# Create a corpus and remove numbers and punctuation
-corpus <- Corpus(VectorSource(df$ProductName))
-corpus <- tm_map(corpus, removeNumbers)
-corpus <- tm_map(corpus, removePunctuation)
 
-# Remove stopwords  as is
-corpus <- tm_map(corpus, removeWords, stopwords("english"))
 
-# Lemmatize the words
-corpus <- tm_map(corpus, function(x) lemmatize_strings(x, pos = "all"))
+
+# Remove special characters from ProductName column
+df$ProductName <- gsub("[^[:alnum:] ]", "", df$ProductName)
+
+# Remove the ðòðò ðòðò characters
+df$ProductName <- gsub("ðòðò ðòðò", "", df$ProductName)
 
 # Remove extra spaces
-corpus <- tm_map(corpus, stripWhitespace)
+df$ProductName <- gsub("\\s+", " ", df$ProductName)
 
-# Replace the original column with the cleaned data
-df$ProductName <- unlist(sapply(corpus, as.character))
+# Standardize text data
+df$ProductName <- tolower(df$ProductName)
+df$ProductName <- trimws(df$ProductName)
 
 # check values
 head(df$ProductName, 5)
+
+
+
+
+
+
+
+
+
+
+
 
 # ********************* The Price ********************* # 248
 
