@@ -84,6 +84,7 @@ cat("Accuracy:", round(conf_mat$overall["Accuracy"] * 100, 2), "\n")
 cat("Precision:", round(conf_mat$byClass["Precision"], 2), "\n")
 cat("Recall:", round(conf_mat$byClass["Recall"], 2), "\n")
 cat("F1-score:", round(conf_mat$byClass["F1"], 2), "\n")
+cat("Sensitivity:", round(conf_mat$byClass["Sensitivity"], 2), "\n")
 
 # Testing -> Define the text labels
 sentiment_labels <- c("positive", "negative")
