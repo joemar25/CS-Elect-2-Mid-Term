@@ -1,3 +1,6 @@
+# Suppress warning messages
+options(warn = -1)
+
 # Load required libraries
 if (!require(tm)) install.packages("tm")
 if (!require(e1071)) install.packages("e1071")
@@ -62,8 +65,13 @@ nb_pred <- predict(nb_model, newdata = test_data[, 1:(ncol(test_data) - 1)])
 
 # Get the confusion matrix and calculate performance metrics
 conf_mat <- confusionMatrix(data = nb_pred, reference = test_data[, ncol(test_data)])
+conf_mat
 
-# Print the confusion matrix
+# Get the confusion matrix and calculate performance metrics
+conf_mat_table <- confusionMatrix(data = nb_pred, reference = test_data[, ncol(test_data)])
+
+# Print the confusion matrix (both alternatives)
+conf_mat_table
 conf_mat$table
 
 # Print performance metrics
