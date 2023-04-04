@@ -147,4 +147,5 @@ ggplot(summary_head, aes(x=product_name, y=total_positive)) +
   xlab("Product Name") +
   ylab("Sentiment Count") +
   ggtitle("bar chart of sentiments")
+  coord_flip()
 
