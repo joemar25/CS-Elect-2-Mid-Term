@@ -5,6 +5,8 @@ library(tm)
 library(tidytext)
 library(dplyr)
 library(purrr)
+library(ggplot2)
+library(reshape2)
 
 # Load the dataset from flipkart
 df <- read.csv("clean_data.csv", stringsAsFactors = FALSE)
@@ -98,6 +100,51 @@ summary_df <- unique(summary_df)
 # Print the completed data frame
 summary_df
 
-# Identify and print the worst products (products with total_positive = 0 and total_negative > 0)
-worst_products <- subset(summary_df, total_positive == 0 & total_negative > 0)
-worst_products
+
+
+
+
+#A BUNCH OF DATA FRAMES pinaglalaruan katulad ng ginawa niya sayo
+
+# Identify and print products with negative sentiments only: wala sila positive
+onlyNEG_prods <- subset(summary_df, total_positive == 0 & total_negative > 0)
+onlyNEG_prods
+
+library(dplyr) 
+
+#highest to lowest na onlyNEG_prods 
+descending_onlyNEG_prods <- arrange(onlyNEG_prods, desc(total_negative))
+
+# Identify and print products with positive sentiments only: wala naman sila negative
+onlyPOS_prods <- filter(summary_df, total_negative == 0 & total_positive > 0)
+onlyPOS_prods
+
+#highest to lowest na onlyPOS_prods
+descending_onlyPOS_prods <- arrange(onlyPOS_prods, desc(total_positive))
+
+#summary arranged - highest to lowest price
+summary_hightolow_price <- summary_df %>%
+  arrange(desc(max_price))
+
+#summary arranged - highest to lowest positive value
+summary_hightolow_POS <- summary_df %>%
+  arrange(desc(total_positive))
+
+#summary arranged - highest to lowest negative value
+summary_hightolow_NEG <- summary_df %>%
+  arrange(desc(total_negative))
+
+#VISUALIZATION
+
+#BAR CHART
+# Select the first 5 rows of the summary_df dataframe
+summary_head <- head(summary_df, 5)
+
+# Create a bar chart of the total positive and total negative sentiments
+ggplot(summary_head, aes(x=product_name, y=total_positive)) +
+  geom_bar(stat="identity", fill="green", alpha=0.5) +
+  geom_bar(aes(y=total_negative), stat="identity", fill="red", alpha=0.5) +
+  xlab("Product Name") +
+  ylab("Sentiment Count") +
+  ggtitle("bar chart of sentiments")
+
