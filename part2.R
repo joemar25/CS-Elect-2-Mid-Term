@@ -63,15 +63,21 @@ neutral_no_more <- sample_n(neutral_no_more, nrow(neutral_no_more))
 # Combine the three data frames into one larger data frame
 all <- bind_rows(positive_samples, negative_samples, neutral_no_more)
 
-# Create an empty data frame to store the summary information
-summary_df <- data.frame(product_name = character(),
-                         max_price = numeric(),
-                         total_positive = numeric(),
-                         total_negative = numeric(),
-                         stringsAsFactors = FALSE)
+# Create an empty data frame with the column names you want
+summary_df <- data.frame(
+  alias = character(),
+  product_name = character(),
+  max_price = numeric(),
+  total_positive = numeric(),
+  total_negative = numeric(),
+  stringsAsFactors = FALSE
+)
 
 # For each unique product in the original data frame
 for (product_name in unique(all$ProductName)) {
+  
+  # Generate an alias for the product name
+  alias <- paste0("product", nrow(summary_df) + 1)
   
   # Subset the data frame to only include the rows for that product
   product_subset <- all[all$ProductName == product_name, ]
@@ -84,11 +90,14 @@ for (product_name in unique(all$ProductName)) {
   total_negative <- sum(product_subset$Sentiment == "negative")
   
   # Create a new row in the empty data frame with the values for the product name, max_price, total_positive, and total_negative
-  new_row <- data.frame(product_name = product_name,
-                        max_price = max_price,
-                        total_positive = total_positive,
-                        total_negative = total_negative,
-                        stringsAsFactors = FALSE)
+  new_row <- data.frame(
+    alias = alias,
+    product_name = product_name,
+    max_price = max_price,
+    total_positive = total_positive,
+    total_negative = total_negative,
+    stringsAsFactors = FALSE
+  )
   
   # Add the new row to the summary data frame
   summary_df <- rbind(summary_df, new_row)
@@ -97,20 +106,11 @@ for (product_name in unique(all$ProductName)) {
 # Remove any duplicate rows in the completed data frame
 summary_df <- unique(summary_df)
 
-# Print the completed data frame
-summary_df
-
-
-
-
-
-#A BUNCH OF DATA FRAMES pinaglalaruan katulad ng ginawa niya sayo
+#A BUNCH OF DATA FRAMES pinaglalaruan katulad ng ginawa niya sayo (lol)
 
 # Identify and print products with negative sentiments only: wala sila positive
 onlyNEG_prods <- subset(summary_df, total_positive == 0 & total_negative > 0)
 onlyNEG_prods
-
-library(dplyr) 
 
 #highest to lowest na onlyNEG_prods 
 descending_onlyNEG_prods <- arrange(onlyNEG_prods, desc(total_negative))
@@ -139,13 +139,14 @@ summary_hightolow_NEG <- summary_df %>%
 #BAR CHART
 # Select the first 5 rows of the summary_df dataframe
 summary_head <- head(summary_df, 5)
-
+summary(summary_head)
 # Create a bar chart of the total positive and total negative sentiments
-ggplot(summary_head, aes(x=product_name, y=total_positive)) +
+ggplot(summary_head, aes(x=alias, y=total_positive)) +
   geom_bar(stat="identity", fill="green", alpha=0.5) +
   geom_bar(aes(y=total_negative), stat="identity", fill="red", alpha=0.5) +
   xlab("Product Name") +
   ylab("Sentiment Count") +
   ggtitle("bar chart of sentiments")
-  coord_flip()
+coord_flip()
+
 
