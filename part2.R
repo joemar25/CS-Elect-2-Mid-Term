@@ -148,5 +148,3 @@ ggplot(summary_head, aes(x=alias, y=total_positive)) +
   ylab("Sentiment Count") +
   ggtitle("bar chart of sentiments")
 coord_flip()
-
-
