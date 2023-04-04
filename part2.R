@@ -32,10 +32,10 @@ for (i in 1:nrow(neutral_samples)) {
   new_dtm <- DocumentTermMatrix(new_corpus, control = list(stopwords = TRUE, minDocFreq = 10))
   new_dtm <- removeSparseTerms(new_dtm, 0.99)
   new_dtm <- as.matrix(new_dtm)
-
+  
   # Predict sentiment of new summary using trained model
   new_pred <- predict(nb_model, newdata = new_dtm)
-
+  
   # Store original columns and predicted sentiment label in the new data frame
   neutral_no_more[i, names(neutral_samples)] <- neutral_samples[i, ]
   neutral_no_more[i, "Predicted_Sentiment"] <- sentiment_labels[new_pred]
@@ -76,17 +76,17 @@ summary_df <- data.frame(
 for (product_name in unique(all$ProductName)) {
   # Generate an alias for the product name
   alias <- paste0("product", nrow(summary_df) + 1)
-
+  
   # Subset the data frame to only include the rows for that product
   product_subset <- all[all$ProductName == product_name, ]
-
+  
   # Calculate the maximum price for that product
   max_price <- max(product_subset$ProductPrice)
-
+  
   # Calculate the total number of positive and negative reviews for that product
   total_positive <- sum(product_subset$Sentiment == "positive")
   total_negative <- sum(product_subset$Sentiment == "negative")
-
+  
   # Create a new row in the empty data frame with the values for the product name, max_price, total_positive, and total_negative
   new_row <- data.frame(
     alias = alias,
@@ -96,7 +96,7 @@ for (product_name in unique(all$ProductName)) {
     total_negative = total_negative,
     stringsAsFactors = FALSE
   )
-
+  
   # Add the new row to the summary data frame
   summary_df <- rbind(summary_df, new_row)
 }
@@ -136,13 +136,25 @@ summary_hightolow_NEG <- summary_df %>%
 
 # BAR CHART
 # Select the first 5 rows of the summary_df dataframe
-summary_head <- head(summary_df, 5)
+summary_head <- head(summary_df, 60)
 summary(summary_head)
-# Create a bar chart of the total positive and total negative sentiments
+
+
+#NOTE: mas prefferable paman si horizontal kasi mas marami mapapakasya
+# HORIZONTAL | Create a bar chart of the total positive and total negative sentiments
+ggplot(summary_head, aes(x = total_positive, y = alias)) +
+  geom_bar(stat = "identity", fill = "green", alpha = 0.5) +
+  geom_bar(aes(x = -total_negative, y = alias), stat = "identity", fill = "red", alpha = 0.5) +
+  xlab("Sentiment Count") +
+  ylab("Product Name") +
+  ggtitle("Bar Chart of Sentiments")
+
+
+# VERTICAL | Create a bar chart of the total positive and total negative sentiments
 ggplot(summary_head, aes(x = alias, y = total_positive)) +
   geom_bar(stat = "identity", fill = "green", alpha = 0.5) +
   geom_bar(aes(y = total_negative), stat = "identity", fill = "red", alpha = 0.5) +
   xlab("Product Name") +
   ylab("Sentiment Count") +
   ggtitle("bar chart of sentiments")
-coord_flip()
+
