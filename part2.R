@@ -26,17 +26,16 @@ colnames(neutral_no_more) <- c(names(neutral_samples), "Predicted_Sentiment")
 
 # Loop through all neutral samples
 for (i in 1:nrow(neutral_samples)) {
-  
   # Preprocess the new summary
   new_summary <- neutral_samples[i, "Summary"]
   new_corpus <- Corpus(VectorSource(new_summary))
   new_dtm <- DocumentTermMatrix(new_corpus, control = list(stopwords = TRUE, minDocFreq = 10))
   new_dtm <- removeSparseTerms(new_dtm, 0.99)
   new_dtm <- as.matrix(new_dtm)
-  
+
   # Predict sentiment of new summary using trained model
   new_pred <- predict(nb_model, newdata = new_dtm)
-  
+
   # Store original columns and predicted sentiment label in the new data frame
   neutral_no_more[i, names(neutral_samples)] <- neutral_samples[i, ]
   neutral_no_more[i, "Predicted_Sentiment"] <- sentiment_labels[new_pred]
@@ -75,20 +74,19 @@ summary_df <- data.frame(
 
 # For each unique product in the original data frame
 for (product_name in unique(all$ProductName)) {
-  
   # Generate an alias for the product name
   alias <- paste0("product", nrow(summary_df) + 1)
-  
+
   # Subset the data frame to only include the rows for that product
   product_subset <- all[all$ProductName == product_name, ]
-  
+
   # Calculate the maximum price for that product
   max_price <- max(product_subset$ProductPrice)
-  
+
   # Calculate the total number of positive and negative reviews for that product
   total_positive <- sum(product_subset$Sentiment == "positive")
   total_negative <- sum(product_subset$Sentiment == "negative")
-  
+
   # Create a new row in the empty data frame with the values for the product name, max_price, total_positive, and total_negative
   new_row <- data.frame(
     alias = alias,
@@ -98,7 +96,7 @@ for (product_name in unique(all$ProductName)) {
     total_negative = total_negative,
     stringsAsFactors = FALSE
   )
-  
+
   # Add the new row to the summary data frame
   summary_df <- rbind(summary_df, new_row)
 }
@@ -106,44 +104,44 @@ for (product_name in unique(all$ProductName)) {
 # Remove any duplicate rows in the completed data frame
 summary_df <- unique(summary_df)
 
-#A BUNCH OF DATA FRAMES pinaglalaruan katulad ng ginawa niya sayo (lol)
+# A BUNCH OF DATA FRAMES pinaglalaruan katulad ng ginawa niya sayo (lol)
 
 # Identify and print products with negative sentiments only: wala sila positive
 onlyNEG_prods <- subset(summary_df, total_positive == 0 & total_negative > 0)
 onlyNEG_prods
 
-#highest to lowest na onlyNEG_prods 
+# highest to lowest na onlyNEG_prods
 descending_onlyNEG_prods <- arrange(onlyNEG_prods, desc(total_negative))
 
 # Identify and print products with positive sentiments only: wala naman sila negative
 onlyPOS_prods <- filter(summary_df, total_negative == 0 & total_positive > 0)
 onlyPOS_prods
 
-#highest to lowest na onlyPOS_prods
+# highest to lowest na onlyPOS_prods
 descending_onlyPOS_prods <- arrange(onlyPOS_prods, desc(total_positive))
 
-#summary arranged - highest to lowest price
+# summary arranged - highest to lowest price
 summary_hightolow_price <- summary_df %>%
   arrange(desc(max_price))
 
-#summary arranged - highest to lowest positive value
+# summary arranged - highest to lowest positive value
 summary_hightolow_POS <- summary_df %>%
   arrange(desc(total_positive))
 
-#summary arranged - highest to lowest negative value
+# summary arranged - highest to lowest negative value
 summary_hightolow_NEG <- summary_df %>%
   arrange(desc(total_negative))
 
-#VISUALIZATION
+# VISUALIZATION
 
-#BAR CHART
+# BAR CHART
 # Select the first 5 rows of the summary_df dataframe
 summary_head <- head(summary_df, 5)
 summary(summary_head)
 # Create a bar chart of the total positive and total negative sentiments
-ggplot(summary_head, aes(x=alias, y=total_positive)) +
-  geom_bar(stat="identity", fill="green", alpha=0.5) +
-  geom_bar(aes(y=total_negative), stat="identity", fill="red", alpha=0.5) +
+ggplot(summary_head, aes(x = alias, y = total_positive)) +
+  geom_bar(stat = "identity", fill = "green", alpha = 0.5) +
+  geom_bar(aes(y = total_negative), stat = "identity", fill = "red", alpha = 0.5) +
   xlab("Product Name") +
   ylab("Sentiment Count") +
   ggtitle("bar chart of sentiments")
