@@ -23,22 +23,21 @@ positive_samples <- df[df$Sentiment == "positive", ]
 negative_samples <- df[df$Sentiment == "negative", ]
 
 # Sample n rows from the positive and negative samples
-n <- min(nrow(positive_samples), nrow(negative_samples))
-positive_samples_subset <- positive_samples[sample(nrow(positive_samples), n), ]
-negative_samples_subset <- negative_samples[sample(nrow(negative_samples), n), ]
+positive_samples_subset <- positive_samples[sample(nrow(positive_samples), ), ]
+negative_samples_subset <- negative_samples[sample(nrow(negative_samples), ), ]
 
 # Combine the samples into a balanced dataset
-balanced_df <- rbind(positive_samples_subset, negative_samples_subset)
+unbalanced_df <- rbind(positive_samples_subset, negative_samples_subset)
 
 # Convert Sentiment to a factor with levels "positive" and "negative"
-balanced_df$Sentiment <- factor(balanced_df$Sentiment, levels = c("positive", "negative"))
+unbalanced_df$Sentiment <- factor(unbalanced_df$Sentiment, levels = c("positive", "negative"))
 
 # Shuffle the rows of the balanced dataset
 set.seed(123)
-balanced_df <- balanced_df[sample(nrow(balanced_df)), ]
+unbalanced_df <- unbalanced_df[sample(nrow(unbalanced_df)), ]
 
 # Create a corpus of the text summaries
-corpus <- VCorpus(VectorSource(balanced_df$Summary))
+corpus <- VCorpus(VectorSource(unbalanced_df$Summary))
 
 # Create a document term matrix
 dtm <- DocumentTermMatrix(corpus, control = list(stopwords = TRUE, minDocFreq = 10))
@@ -46,7 +45,7 @@ dtm <- removeSparseTerms(dtm, 0.99) # Remove sparse terms
 dtm <- as.matrix(dtm) # Convert to matrix
 
 # Add sentiment to the matrix
-sentiment <- balanced_df$Sentiment
+sentiment <- unbalanced_df$Sentiment
 dtm_sentiment <- cbind(dtm, sentiment)
 
 # Convert dtm_sentiment to a data frame
